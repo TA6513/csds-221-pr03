@@ -30,21 +30,14 @@ let gameLoopInterval; // Variable to hold the interval for the game loop
 const pauseButton = document.getElementById('pauseButton');
 const resetButton = document.getElementById('resetButton');
 
+const dinoImage = new Image();
+dinoImage.src = 'dino.png'; // Replace 'trex.png' with the path to your T-Rex image
+
 
 // Function to draw the T-Rex dino
 function drawDino() {
-    ctx.fillStyle = '#008000'; // Green color for the T-Rex
-    // Body
-    ctx.fillRect(dinoX + 10, dinoY, 20, 20);
-    // Head
-    ctx.fillRect(dinoX, dinoY + 20, 10, 10);
-    // Arms
-    ctx.fillRect(dinoX + 30, dinoY + 10, 5, 10);
-    // Legs
-    ctx.fillRect(dinoX + 5, dinoY + 20, 5, 10);
-    ctx.fillRect(dinoX + 25, dinoY + 20, 5, 10);
+    ctx.drawImage(dinoImage, dinoX, dinoY, 40, 40); // Adjust the width and height as needed
 }
-
 
 // Function to draw saguaro-like obstacles
 function drawObstacle() {
