@@ -21,6 +21,19 @@ canvas {
         background-position: 0 bottom;
     }
     to {
-        background-position: -890% bottom;
+        background-position: -896% bottom;
     }
+}
+
+#titleImage {
+    position: absolute;
+    top: 350px; /* Adjust the top distance to position the title image directly above the canvas */
+    left: 50%;
+    transform: translateX(-75%);
+    z-index: 1; /* Ensure the title image appears above other elements */
+}
+
+#titleImage img {
+    width: 200px; /* Adjust the width of the title image */
+    height: auto; /* Maintain aspect ratio */
 }
