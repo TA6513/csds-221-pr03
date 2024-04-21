@@ -33,7 +33,6 @@ const resetButton = document.getElementById('resetButton');
 const dinoImage = new Image();
 dinoImage.src = 'assets/dino.png'; // Replace 'trex.png' with the path to your T-Rex image
 
-
 // Function to draw the T-Rex dino
 function drawDino() {
     ctx.drawImage(dinoImage, dinoX, dinoY, 40, 40); // Adjust the width and height as needed
@@ -120,22 +119,17 @@ function updateScore() {
 
 function gameOver() {
     isGameOver = true;
+    document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     alert('Game Over! Your score: ' + Math.floor(score));
     frameRate = defaultFrameRate; // Reset frame rate
 }
 
-function drawPausedText() {
-    ctx.font = "30px Arial";
-    ctx.fillStyle = "red";
-    ctx.textAlign = "center";
-    ctx.fillText(pausedText, canvas.width / 2, canvas.height / 2);
-}
-
 function gameLoop() {
-    if (!isGameOver) {
+    if (!isGameOver && !isPaused) {
         clearCanvas();
+        document.getElementById('gameCanvas').style.animationPlayState = 'running';
         if (isPaused) {
-            drawPausedText(); // Draw "Paused" text if the game is paused
+
         } else {
             drawDino();
             moveObstacle();
@@ -172,6 +166,7 @@ document.addEventListener('keydown', (event) => {
 
 function pauseGame() {
     isPaused = true;
+    document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     clearTimeout(gameLoopInterval); // Stop the game loop
     pauseButton.innerText = 'Resume';
 }
