@@ -198,6 +198,26 @@ function gameOver() {
     checkAndUpdateHighScore();
 }
 
+function resetGame() {
+    isGameOver = false;
+    score = 0;
+    dinoX = 0;
+    dinoY = canvas.height - 43;
+    obstacles = []; // Reset the obstacles array
+
+    frameRate = defaultFrameRate; // Reset frame rate to default
+
+    // Clear any existing game loop interval and start a new game loop
+    clearTimeout(gameLoopInterval);
+    gameLoop();
+
+    // Call resetObstacle() multiple times to spawn initial obstacles
+    for (let i = 0; i < initialObstacleCount; i++) {
+        resetObstacle();
+    }
+    document.getElementById('gameOverScreen').style.display = 'none';
+}
+
 function gameLoop() {
     if (!isGameOver && !isPaused) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -224,48 +244,15 @@ function gameLoop() {
     }
 }
 
-function resetGame() {
-    isGameOver = false;
-    score = 0;
-    dinoX = 0;
-    dinoY = canvas.height - 43;
-    obstacles = []; // Reset the obstacles array
-
-    frameRate = defaultFrameRate; // Reset frame rate to default
-
-    // Clear any existing game loop interval and start a new game loop
-    clearTimeout(gameLoopInterval);
-    gameLoop();
-
-    // Call resetObstacle() multiple times to spawn initial obstacles
-    for (let i = 0; i < initialObstacleCount; i++) {
-        resetObstacle();
-    }
-    document.getElementById('gameOverScreen').style.display = 'none';
-}
-
 document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space') {
+    if (event.code === 'Space' || event.code === 'ArrowUp') {
         if (isGameOver) {
             resetGame();
         } else {
             jump();
         }
     }
-});
 
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'ArrowUp') {
-        if (isGameOver) {
-            resetGame();
-        } else {
-            jump();
-        }
-    }
-});
-
-
-document.addEventListener('keydown', (event) => {
     if (event.code === 'ArrowDown' && !isJumping) {
         isDucking = true;
     }
@@ -278,7 +265,7 @@ document.addEventListener('keyup', (event) => {
 });
 
 resetButton.addEventListener('click', () => {
-    resetButton.blur(); // Remove focus from the reset button
+    resetButton.blur();
     resetGame();
 });
 
