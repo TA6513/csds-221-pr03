@@ -6,7 +6,8 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f7f7f7;
-    font-family: 'pixelated', sans-serif;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
 }
 
 canvas {
@@ -25,7 +26,7 @@ canvas {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 15px;
+    font-size: 18px;
     color: black; /* Optional: Set color for better visibility */
 }
 
@@ -41,11 +42,14 @@ canvas {
     display: none; /* Initially hidden */
 }
 
-@font-face {
-    font-family: 'pixelated';
-    src: url('assets/pixelated.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
+
+@keyframes scrollGround {
+    from {
+        background-position: 0 bottom;
+    }
+    to {
+        background-position: -896% bottom;
+    }
 }
 
 #titleImage {

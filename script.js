@@ -266,7 +266,7 @@ document.addEventListener('keydown', (event) => {
 
 
 document.addEventListener('keydown', (event) => {
-    if (event.code === 'ArrowDown') {
+    if (event.code === 'ArrowDown' && !isJumping) {
         isDucking = true;
     }
 });

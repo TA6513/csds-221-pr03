@@ -5,5 +5,5 @@ Game logic and implementation are original
 
 Space to jump, down arrow to duck, pause and reset buttons included
 
-Cactus generation is mostly random. The game tries not to put cacti too
-close together but it's not guaranteed to be perfect
+Cactus generation is semi random, places a cactus if it's been too long without one,
+tries to avoid placing them too close together but not perfect.
