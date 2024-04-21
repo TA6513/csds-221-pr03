@@ -1,17 +1,20 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const defaultFrameRate = 60; // Default frame rate
-let frameRate = defaultFrameRate; // Current frame rate
+const defaultFrameRate = 60;
+let frameRate = defaultFrameRate;
 
 let dinoX = 50;
 let dinoY = canvas.height - 40;
 let dinoWidth = 40;
 let dinoHeight = 40;
+const dinoImage = new Image();
+dinoImage.src = 'assets/dino.png';
 
 let obstacleX = canvas.width;
 let obstacleWidth = 20;
 let obstacleHeight = 40;
 let obstacleSpeed = 5;
+const obstacles = []; // Array to store obstacles
 
 let isJumping = false;
 let jumpHeight = 65;
@@ -22,52 +25,21 @@ const gravity = 0.6; // Adjust as needed
 let score = 0;
 const scoreIncrementPerSecond = 10;
 const speedDisplay = document.getElementById('speed');
-let isGameOver = false;
 
+let isGameOver = false;
 let isPaused = false;
 let pausedText = "Paused";
-let gameLoopInterval; // Variable to hold the interval for the game loop
+let gameLoopInterval;
 const pauseButton = document.getElementById('pauseButton');
 const resetButton = document.getElementById('resetButton');
 
 const jumpSound = document.getElementById("jumpSound");
 const deathSound = document.getElementById("deathSound");
+const speedupSound = document.getElementById("speedupSound");
 
-const dinoImage = new Image();
-dinoImage.src = 'assets/dino.png'; // Replace 'trex.png' with the path to your T-Rex image
-
-// Function to draw the T-Rex dino
 function drawDino() {
     ctx.drawImage(dinoImage, dinoX, dinoY, 40, 40); // Adjust the width and height as needed
 }
-
-// Function to draw saguaro-like obstacles
-function drawObstacle() {
-    ctx.fillStyle = '#555';
-    // Draw the main section of the saguaro
-    ctx.fillRect(obstacleX, canvas.height - obstacleHeight, 8, obstacleHeight);
-
-    // Draw the "L" shaped sections on the sides
-    ctx.fillRect(obstacleX - 13, canvas.height - obstacleHeight + 10, 5, 15);
-    ctx.fillRect(obstacleX - 10, canvas.height - obstacleHeight + 20, 10, 5);
-    ctx.fillRect(obstacleX + 13, canvas.height - obstacleHeight + 15, 5, 10);
-    ctx.fillRect(obstacleX + 8, canvas.height - obstacleHeight + 25, 10, 5);
-}
-
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function resetObstacle() {
-    obstacleX = canvas.width + Math.random() * (canvas.width / 2); // Randomize the initial x position of the obstacle
-}
-
-function moveObstacle() {
-    obstacleX -= obstacleSpeed;
-    if (obstacleX + obstacleWidth < 0) {
-        resetObstacle();
-    }
-} 
 
 function jump() {
     if (!isGameOver && !isJumping) {
@@ -89,19 +61,53 @@ function jump() {
     }
 }
 
+function resetObstacle() {
+    const newObstacleX = canvas.width + Math.random() * (canvas.width / 2);
+    const newObstacle = {
+        x: newObstacleX,
+        width: 20,
+        height: 40
+    };
+    obstacles.push(newObstacle);
+}
+
+function moveObstacle() {
+    obstacles.forEach(obstacle => {
+        obstacle.x -= obstacleSpeed;
+        if (obstacle.x + obstacle.width < 0) {
+            obstacles.shift(); // Remove the obstacle from the array when it goes off-screen
+        }
+    });
+}
+
+function drawObstacles() {
+    obstacles.forEach(obstacle => {
+        ctx.fillStyle = '#555';
+        ctx.fillRect(obstacle.x, canvas.height - obstacle.height, obstacle.width, obstacle.height);
+    });
+}
+
 function checkCollision() {
-    return !!(dinoX + dinoWidth > obstacleX && dinoX < obstacleX + obstacleWidth &&
-        dinoY + dinoHeight > canvas.height - obstacleHeight);
+    for (const element of obstacles) {
+        const obstacle = element;
+        if (dinoX + dinoWidth > obstacle.x && dinoX < obstacle.x + obstacle.width &&
+            dinoY + dinoHeight > canvas.height - obstacle.height) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function updateScore() {
-    score += scoreIncrementPerSecond / frameRate; // Increment the score based on the frame rate
+    score += scoreIncrementPerSecond / frameRate;
     document.getElementById('score').innerText = 'Score: ' + Math.floor(score);
 
-    // Check if score reaches a multiple of 250
+    if (score % 100 == 0) {
+        speedupSound.play();
+    }
+
     if (score % 250 === 0) {
-        // Increase the speed by a factor (adjust as needed)
-        frameRate *= 1.3; // Increase speed by 10%
+        frameRate *= 1.3;
     }
 }
 
@@ -117,19 +123,15 @@ function gameLoop() {
     if (!isGameOver && !isPaused) {
         clearCanvas();
         document.getElementById('gameCanvas').style.animationPlayState = 'running';
-        if (isPaused) {
-
+        drawDino();
+        moveObstacle();
+        drawObstacles();
+        if (checkCollision()) {
+            gameOver();
         } else {
-            drawDino();
-            moveObstacle();
-            drawObstacle();
-            if (checkCollision()) {
-                gameOver();
-            } else {
-                updateScore();
-            }
-            speedDisplay.innerText = 'Speed: ' + frameRate;
+            updateScore();
         }
+        speedDisplay.innerText = 'Speed: ' + frameRate;
     }
     if (!isPaused) {
         gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate); // Request next frame after a delay
