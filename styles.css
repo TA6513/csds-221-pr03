@@ -6,6 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f7f7f7;
+    font-family: "PixelFont", PublicPixel, sans-serif;
 }
 
 canvas {
@@ -45,4 +46,9 @@ canvas {
 #speed {
     right: 10px; /* Adjust the right distance for the speed */
     top: 40px; /* Adjust the top distance for the speed */
+}
+
+@font-face {
+    font-family: "PixelFont";
+    src: url("assets/PublicPixel-E447g.woff") format('woff');
 }

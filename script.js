@@ -30,6 +30,9 @@ let gameLoopInterval; // Variable to hold the interval for the game loop
 const pauseButton = document.getElementById('pauseButton');
 const resetButton = document.getElementById('resetButton');
 
+const jumpSound = document.getElementById("jumpSound");
+const deathSound = document.getElementById("deathSound");
+
 const dinoImage = new Image();
 dinoImage.src = 'assets/dino.png'; // Replace 'trex.png' with the path to your T-Rex image
 
@@ -66,25 +69,10 @@ function moveObstacle() {
     }
 } 
 
-function playTone() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain(); // Create a GainNode
-    oscillator.type = 'square'; // Set oscillator type to square wave
-    oscillator.frequency.setValueAtTime(520, audioContext.currentTime); // Set frequency (adjust as needed)
-    oscillator.connect(gainNode); // Connect oscillator to the gain node
-    gainNode.connect(audioContext.destination); // Connect gain node to the audio output
-    gainNode.gain.value = 0.15; // Set the volume level (0 to 1)
-    oscillator.start(); // Start the oscillator
-    setTimeout(() => {
-        oscillator.stop(); // Stop the oscillator after a short duration (adjust as needed)
-    }, 50); // Stop after 50 milliseconds (adjust as needed)
-}
-
 function jump() {
     if (!isGameOver && !isJumping) {
         isJumping = true;
-        playTone();
+        jumpSound.play();
         let jumpSpeed = jumpAcceleration; // Initial jump speed
         let jumpInterval = setInterval(() => {
             // Update dino position based on jump speed
@@ -120,6 +108,7 @@ function updateScore() {
 function gameOver() {
     isGameOver = true;
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
+    deathSound.play();
     alert('Game Over! Your score: ' + Math.floor(score));
     frameRate = defaultFrameRate; // Reset frame rate
 }
