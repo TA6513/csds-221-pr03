@@ -12,6 +12,7 @@ dinoImage.src = 'assets/dino.png';
 const dinoDuckImage = new Image();
 dinoDuckImage.src = 'assets/dinoducking.png'
 
+let initialObstacleCount = 1;
 let obstacleX = canvas.width;
 let obstacleWidth;
 let obstacleHeight;
@@ -114,7 +115,6 @@ function moveObstacle() {
         obstacle.x -= obstacleSpeed;
         if (obstacle.x + obstacle.width < 0) {
             obstacles.shift(); // Remove the obstacle from the array when it goes off-screen
-            console.log('Obstacle removed');
         }
     });
 }
