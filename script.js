@@ -3,24 +3,32 @@ const ctx = canvas.getContext('2d');
 const defaultFrameRate = 60;
 let frameRate = defaultFrameRate;
 
-let dinoX = 50;
+let dinoX = 0;
 let dinoY = canvas.height - 40;
 let dinoWidth = 40;
-let dinoHeight = 40;
+let dinoHeight = 43;
 const dinoImage = new Image();
 dinoImage.src = 'assets/dino.png';
+const dinoDuckImage = new Image();
+dinoDuckImage.src = 'assets/dinoducking.png'
 
 let obstacleX = canvas.width;
-let obstacleWidth = 20;
-let obstacleHeight = 40;
+let obstacleWidth;
+let obstacleHeight;
 let obstacleSpeed = 5;
-const obstacles = []; // Array to store obstacles
+let obstacles = []; // Array to store obstacles
+const cactusImage1 = new Image();
+cactusImage1.src = 'assets/cactus.png'; // Path to the first type of cactus image
+const cactusImage2 = new Image();
+cactusImage2.src = 'assets/cactus2.png'; // Path to the second type of cactus image
+
 
 let isJumping = false;
+let isDucking = false;
 let jumpHeight = 65;
 let jumpSpeed = 10;
-const jumpAcceleration = -9; // Adjust as needed
-const gravity = 0.6; // Adjust as needed
+const jumpAcceleration = -11; // Adjust as needed
+const gravity = 0.7; // Adjust as needed
 
 let score = 0;
 const scoreIncrementPerSecond = 10;
@@ -38,7 +46,12 @@ const deathSound = document.getElementById("deathSound");
 const speedupSound = document.getElementById("speedupSound");
 
 function drawDino() {
-    ctx.drawImage(dinoImage, dinoX, dinoY, 40, 40); // Adjust the width and height as needed
+    let dinoDraw = isDucking ? dinoDuckImage : dinoImage;
+    if(!isDucking) {
+        ctx.drawImage(dinoDraw, dinoX, dinoY, 40, 43);
+    } else {
+        ctx.drawImage(dinoDraw, dinoX, dinoY + 17, 55, 26);
+    }
 }
 
 function jump() {
@@ -65,27 +78,66 @@ function resetObstacle() {
     const newObstacleX = canvas.width + Math.random() * (canvas.width / 2);
     const newObstacle = {
         x: newObstacleX,
-        width: 20,
-        height: 40
+        width: 0, // Initialize width and height to be set based on type
+        height: 0,
+        type: Math.random() < 0.5 ? 'type1' : 'type2' // Randomly choose between type1 and type2
     };
-    obstacles.push(newObstacle);
+
+    // Set width and height based on type
+    if (newObstacle.type === 'type1') {
+        newObstacle.width = 23; // Adjust width for type1
+        newObstacle.height = 46; // Adjust height for type1
+    } else {
+        newObstacle.width = 15; // Adjust width for type2
+        newObstacle.height = 33; // Adjust height for type2
+    }
+
+    // Check for collision with existing obstacles
+    let overlap = false;
+    obstacles.forEach(obstacle => {
+        if (newObstacle.x < obstacle.x + obstacle.width &&
+            newObstacle.x + newObstacle.width > obstacle.x &&
+            canvas.height - newObstacle.height < canvas.height - obstacle.height + obstacle.height) {
+            overlap = true;
+        }
+    });
+
+    // Add the new obstacle only if there's no overlap
+    if (!overlap) {
+        obstacles.push(newObstacle);
+    }
 }
+
 
 function moveObstacle() {
     obstacles.forEach(obstacle => {
         obstacle.x -= obstacleSpeed;
         if (obstacle.x + obstacle.width < 0) {
             obstacles.shift(); // Remove the obstacle from the array when it goes off-screen
+            console.log('Obstacle removed');
         }
     });
 }
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
-        ctx.fillStyle = '#555';
-        ctx.fillRect(obstacle.x, canvas.height - obstacle.height, obstacle.width, obstacle.height);
+        // Determine which type of cactus to draw based on obstacle properties
+        let cactusImage;
+        let cactusWidth, cactusHeight;
+        if (obstacle.type === 'type1') {
+            cactusImage = cactusImage1;
+            cactusWidth = 23; // Adjust the width as needed
+            cactusHeight = 46; // Adjust the height as needed
+        } else {
+            cactusImage = cactusImage2;
+            cactusWidth = 15; // Adjust the width as needed
+            cactusHeight = 33; // Adjust the height as needed
+        }
+        // Draw the cactus image at the obstacle's position
+        ctx.drawImage(cactusImage, obstacle.x, canvas.height - cactusHeight, cactusWidth, cactusHeight);
     });
 }
+
 
 function checkCollision() {
     for (const element of obstacles) {
@@ -121,7 +173,7 @@ function gameOver() {
 
 function gameLoop() {
     if (!isGameOver && !isPaused) {
-        clearCanvas();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         document.getElementById('gameCanvas').style.animationPlayState = 'running';
         drawDino();
         moveObstacle();
@@ -132,6 +184,9 @@ function gameLoop() {
             updateScore();
         }
         speedDisplay.innerText = 'Speed: ' + frameRate;
+        if (Math.random() < 0.015) { // Adjust the probability as needed
+            resetObstacle();
+        }
     }
     if (!isPaused) {
         gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate); // Request next frame after a delay
@@ -141,17 +196,38 @@ function gameLoop() {
 function resetGame() {
     isGameOver = false;
     score = 0;
-    dinoX = 50;
+    dinoX = 0;
     dinoY = canvas.height - 40;
-    obstacleX = canvas.width;
+    obstacles = []; // Reset the obstacles array
+
     frameRate = defaultFrameRate; // Reset frame rate to default
-    clearTimeout(gameLoopInterval); // Stop the existing game loop
-    gameLoop(); // Start a new game loop
+
+    // Clear any existing game loop interval and start a new game loop
+    clearTimeout(gameLoopInterval);
+    gameLoop();
+
+    // Call resetObstacle() multiple times to spawn initial obstacles
+    for (let i = 0; i < initialObstacleCount; i++) {
+        resetObstacle();
+    }
 }
+
 
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {
         jump();
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'ArrowDown') {
+        isDucking = true;
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.code === 'ArrowDown') {
+        isDucking = false;
     }
 });
 
@@ -178,8 +254,8 @@ pauseButton.addEventListener('click', () => {
 });
 
 resetButton.addEventListener('click', () => {
-    resetGame();
     resetButton.blur(); // Remove focus from the reset button
+    resetGame();
 });
 
 gameLoop();

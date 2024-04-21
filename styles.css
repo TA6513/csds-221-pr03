@@ -6,7 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f7f7f7;
-    font-family: Helvetica, sans-serif;
+    font-family: 'pixelated', sans-serif;
 }
 
 canvas {
@@ -26,9 +26,16 @@ canvas {
     }
 }
 
+@font-face {
+    font-family: 'pixelated';
+    src: url('assets/pixelated.ttf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
 #titleImage {
     position: absolute;
-    top: 350px; /* Adjust the top distance to position the title image directly above the canvas */
+    top: 250px; /* Adjust the top distance to position the title image directly above the canvas */
     left: 50%;
     transform: translateX(-75%);
     z-index: 1; /* Ensure the title image appears above other elements */
