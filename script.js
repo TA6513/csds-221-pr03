@@ -42,7 +42,7 @@ let isPaused = false;
 let pausedText = "Paused";
 let gameLoopInterval;
 const pauseButton = document.getElementById('pauseButton');
-const resetButton = document.getElementById('resetButton');
+const resetButton = document.getElementById('gameOverImage');
 
 const jumpSound = document.getElementById("jumpSound");
 const deathSound = document.getElementById("deathSound");
@@ -172,7 +172,7 @@ function gameOver() {
     drawDino();
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     deathSound.play();
-    alert('Game Over! Your score: ' + Math.floor(score));
+    document.getElementById('gameOverScreen').style.display = 'block';
     frameRate = defaultFrameRate; // Reset frame rate
 }
 
@@ -215,19 +215,7 @@ function resetGame() {
     for (let i = 0; i < initialObstacleCount; i++) {
         resetObstacle();
     }
-}
-
-function pauseGame() {
-    isPaused = true;
-    document.getElementById('gameCanvas').style.animationPlayState = 'paused';
-    clearTimeout(gameLoopInterval); // Stop the game loop
-    pauseButton.innerText = 'Resume';
-}
-
-function resumeGame() {
-    isPaused = false;
-    gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate); // Resume the game loop
-    pauseButton.innerText = 'Pause';
+    document.getElementById('gameOverScreen').style.display = 'none';
 }
 
 document.addEventListener('keydown', (event) => {
@@ -261,15 +249,6 @@ document.addEventListener('keyup', (event) => {
     if (event.code === 'ArrowDown') {
         isDucking = false;
     }
-});
-
-pauseButton.addEventListener('click', () => {
-    if (isPaused) {
-        resumeGame();
-    } else {
-        pauseGame();
-    }
-    pauseButton.blur(); // Remove focus from the pause button
 });
 
 resetButton.addEventListener('click', () => {

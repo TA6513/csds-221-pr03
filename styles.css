@@ -17,6 +17,39 @@ canvas {
     background-position: 0 bottom;
 }
 
+#gameContainer {
+    position: relative;
+}
+
+#score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 15px;
+    color: black; /* Optional: Set color for better visibility */
+}
+
+#speed {
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    font-size: 15px;
+    color: black; /* Optional: Set color for better visibility */
+}
+
+#gameOverScreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 20px;
+    color: white;
+    display: none; /* Initially hidden */
+}
+
+
 @keyframes scrollGround {
     from {
         background-position: 0 bottom;
@@ -37,20 +70,11 @@ canvas {
     position: absolute;
     top: 250px; /* Adjust the top distance to position the title image directly above the canvas */
     left: 50%;
-    transform: translateX(-75%);
+    transform: translateX(-50%);
     z-index: 1; /* Ensure the title image appears above other elements */
 }
 
 #titleImage img {
     width: 200px; /* Adjust the width of the title image */
     height: auto; /* Maintain aspect ratio */
-}
-
-#score {
-    right: 10px; /* Adjust the right distance for the score */
-}
-
-#speed {
-    right: 10px; /* Adjust the right distance for the speed */
-    top: 40px; /* Adjust the top distance for the speed */
 }

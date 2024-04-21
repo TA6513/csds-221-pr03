@@ -10,16 +10,17 @@
     <audio id="jumpSound" preload="auto" src="assets/jumpsound.mp3"></audio>
     <audio id="deathSound" preload="auto" src="assets/deathsound.mp3"></audio>
     <audio id="speedupSound" preload="auto" src="assets/speedup.mp3"></audio>
-    <div id="gameContainer">
-        <div id="score" class="info"></div>
-        <div id="speed" class="info"></div>
-        <div id="titleImage">
-            <img src="assets/title.png" alt="Game Title">
-        </div>
-        <canvas id="gameCanvas" width="600" height="200"></canvas>
+    <div id="titleImage">
+        <img src="assets/title.png" alt="Game Title">
     </div>
-    <button id="pauseButton">Pause</button>
-    <button id="resetButton">Restart Game</button>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="600" height="150"></canvas>
+        <div id="score" class="hud"></div>
+        <div id="speed" class="hud"></div>
+    </div>
+    <div id="gameOverScreen">
+        <img src="assets/gameover.png" alt="GAME OVER" id = "gameOverImage">
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
