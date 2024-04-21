@@ -31,7 +31,7 @@ const pauseButton = document.getElementById('pauseButton');
 const resetButton = document.getElementById('resetButton');
 
 const dinoImage = new Image();
-dinoImage.src = 'dino.png'; // Replace 'trex.png' with the path to your T-Rex image
+dinoImage.src = 'assets/dino.png'; // Replace 'trex.png' with the path to your T-Rex image
 
 
 // Function to draw the T-Rex dino
