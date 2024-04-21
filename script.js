@@ -24,18 +24,18 @@ const cactusImage1 = new Image();
 cactusImage1.src = 'assets/cactus.png'; // Path to the first type of cactus image
 const cactusImage2 = new Image();
 cactusImage2.src = 'assets/cactus2.png'; // Path to the second type of cactus image
+let framesSinceLastCactus = 0; // Counter to track frames since the last cactus was spawned
+const cactusSpawnInterval = 180;
 
 
 let isJumping = false;
 let isDucking = false;
-let jumpHeight = 65;
 let jumpSpeed = 10;
 const jumpAcceleration = -11; // Adjust as needed
 const gravity = 0.7; // Adjust as needed
 
 let score = 0;
 const scoreIncrementPerSecond = 10;
-const speedDisplay = document.getElementById('speed');
 
 let isGameOver = false;
 let isPaused = false;
@@ -49,17 +49,17 @@ const deathSound = document.getElementById("deathSound");
 const speedupSound = document.getElementById("speedupSound");
 
 function drawDino() {
-    if (isDucking) {
-        ctx.drawImage(dinoDuckImage, dinoX, dinoY + 17, 55, 26);
-    } else if (isGameOver) {
+    if (isGameOver) {
         ctx.drawImage(dinoDeadImage, dinoX, dinoY, 40, 43);
+    } else if (isDucking) {
+        ctx.drawImage(dinoDuckImage, dinoX, dinoY + 17, 55, 26);
     } else {
         ctx.drawImage(dinoImage, dinoX, dinoY, 40, 43);
     }
 }
 
 function jump() {
-    if (!isGameOver && !isJumping) {
+    if (!isGameOver && !isJumping && !isDucking) {
         isJumping = true;
         jumpSound.play();
         let jumpSpeed = jumpAcceleration; // Initial jump speed
@@ -155,7 +155,7 @@ function checkCollision() {
 
 function updateScore() {
     score += scoreIncrementPerSecond / frameRate;
-    document.getElementById('score').innerText = 'Score: ' + Math.floor(score);
+    document.getElementById('score').innerText = 'HI  ' + getHighScore().toString().padStart(5, 0) + '  ' + Math.floor(score).toString().padStart(5, 0);
 
     if (Math.floor(score) % 100 == 0 && Math.floor(score) != 0) {
         speedupSound.play();
@@ -167,13 +167,35 @@ function updateScore() {
     }
 }
 
+// Function to get the high score from local storage
+function getHighScore() {
+    const highScore = localStorage.getItem('highScore');
+    return highScore ? parseInt(highScore) : 0; // Parse the value to an integer, or return 0 if it's not present
+}
+
+
+// Function to save the high score to local storage
+function saveHighScore(score) {
+    localStorage.setItem('highScore', score.toString()); // Convert the score to a string before saving
+}
+
+// Update the high score if the current score surpasses it
+function checkAndUpdateHighScore() {
+    const currentScore = Math.floor(score);
+    const highScore = getHighScore();
+    if (currentScore > highScore) {
+        saveHighScore(currentScore);
+    }
+}
+
 function gameOver() {
-    isGameOver = true; 
+    isGameOver = true;
     drawDino();
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     deathSound.play();
     document.getElementById('gameOverScreen').style.display = 'block';
     frameRate = defaultFrameRate; // Reset frame rate
+    checkAndUpdateHighScore();
 }
 
 function gameLoop() {
@@ -183,14 +205,18 @@ function gameLoop() {
         drawDino();
         moveObstacle();
         drawObstacles();
+        framesSinceLastCactus++;
         if (checkCollision()) {
             gameOver();
         } else {
             updateScore();
         }
-        speedDisplay.innerText = 'Speed: ' + frameRate;
         if (Math.random() < 0.01) { // Adjust the probability as needed
             resetObstacle();
+        }
+        if (framesSinceLastCactus >= cactusSpawnInterval) {
+            resetObstacle();
+            framesSinceLastCactus = 0; // Reset the counter
         }
     }
     if (!isPaused) {

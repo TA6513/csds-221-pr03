@@ -29,14 +29,6 @@ canvas {
     color: black; /* Optional: Set color for better visibility */
 }
 
-#speed {
-    position: absolute;
-    top: 30px;
-    right: 10px;
-    font-size: 15px;
-    color: black; /* Optional: Set color for better visibility */
-}
-
 #gameOverScreen {
     position: fixed;
     top: 50%;
@@ -47,16 +39,6 @@ canvas {
     padding: 20px;
     color: white;
     display: none; /* Initially hidden */
-}
-
-
-@keyframes scrollGround {
-    from {
-        background-position: 0 bottom;
-    }
-    to {
-        background-position: -896% bottom;
-    }
 }
 
 @font-face {
