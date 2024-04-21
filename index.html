@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="titleImage">
-        <img src="assets/title.png" alt="DINO GAME">
+    <div id="gameContainer">
+        <div id="score" class="info"></div>
+        <div id="speed" class="info"></div>
+        <div id="titleImage">
+            <img src="assets/title.png" alt="Game Title">
+        </div>
+        <canvas id="gameCanvas" width="600" height="200"></canvas>
     </div>
-    <canvas id="gameCanvas" width="600" height="200"></canvas>
-    <div id="score" style="position: absolute; top: 10px; right: 10px; font-size: 20px;"></div>
-    <div id="speed" style="position: absolute; top: 40px; right: 10px; font-size: 16px;"></div>
     <button id="pauseButton">Pause</button>
     <button id="resetButton">Restart Game</button>
     <script src="script.js"></script>
