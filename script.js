@@ -4,13 +4,15 @@ const defaultFrameRate = 60;
 let frameRate = defaultFrameRate;
 
 let dinoX = 0;
-let dinoY = canvas.height - 40;
+let dinoY = canvas.height - 43;
 let dinoWidth = 40;
 let dinoHeight = 43;
 const dinoImage = new Image();
 dinoImage.src = 'assets/dino.png';
 const dinoDuckImage = new Image();
 dinoDuckImage.src = 'assets/dinoducking.png'
+const dinoDeadImage = new Image();
+dinoDeadImage.src = 'assets/dinodead.png'
 
 let initialObstacleCount = 1;
 let obstacleX = canvas.width;
@@ -47,11 +49,12 @@ const deathSound = document.getElementById("deathSound");
 const speedupSound = document.getElementById("speedupSound");
 
 function drawDino() {
-    let dinoDraw = isDucking ? dinoDuckImage : dinoImage;
-    if(!isDucking) {
-        ctx.drawImage(dinoDraw, dinoX, dinoY, 40, 43);
+    if (isDucking) {
+        ctx.drawImage(dinoDuckImage, dinoX, dinoY + 17, 55, 26);
+    } else if (isGameOver) {
+        ctx.drawImage(dinoDeadImage, dinoX, dinoY, 40, 43);
     } else {
-        ctx.drawImage(dinoDraw, dinoX, dinoY + 17, 55, 26);
+        ctx.drawImage(dinoImage, dinoX, dinoY, 40, 43);
     }
 }
 
@@ -154,17 +157,19 @@ function updateScore() {
     score += scoreIncrementPerSecond / frameRate;
     document.getElementById('score').innerText = 'Score: ' + Math.floor(score);
 
-    if (score % 100 == 0) {
+    if (Math.floor(score) % 100 == 0 && Math.floor(score) != 0) {
         speedupSound.play();
     }
 
-    if (score % 250 === 0) {
+    if (Math.floor(score) % 250 === 0 && Math.floor(score) != 0) {
         frameRate *= 1.3;
+        score++;
     }
 }
 
 function gameOver() {
-    isGameOver = true;
+    isGameOver = true; 
+    drawDino();
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     deathSound.play();
     alert('Game Over! Your score: ' + Math.floor(score));
@@ -184,7 +189,7 @@ function gameLoop() {
             updateScore();
         }
         speedDisplay.innerText = 'Speed: ' + frameRate;
-        if (Math.random() < 0.015) { // Adjust the probability as needed
+        if (Math.random() < 0.01) { // Adjust the probability as needed
             resetObstacle();
         }
     }
@@ -197,7 +202,7 @@ function resetGame() {
     isGameOver = false;
     score = 0;
     dinoX = 0;
-    dinoY = canvas.height - 40;
+    dinoY = canvas.height - 43;
     obstacles = []; // Reset the obstacles array
 
     frameRate = defaultFrameRate; // Reset frame rate to default
@@ -212,25 +217,6 @@ function resetGame() {
     }
 }
 
-
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space') {
-        jump();
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'ArrowDown') {
-        isDucking = true;
-    }
-});
-
-document.addEventListener('keyup', (event) => {
-    if (event.code === 'ArrowDown') {
-        isDucking = false;
-    }
-});
-
 function pauseGame() {
     isPaused = true;
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
@@ -243,6 +229,39 @@ function resumeGame() {
     gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate); // Resume the game loop
     pauseButton.innerText = 'Pause';
 }
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+        if (isGameOver) {
+            resetGame();
+        } else {
+            jump();
+        }
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'ArrowUp') {
+        if (isGameOver) {
+            resetGame();
+        } else {
+            jump();
+        }
+    }
+});
+
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'ArrowDown') {
+        isDucking = true;
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.code === 'ArrowDown') {
+        isDucking = false;
+    }
+});
 
 pauseButton.addEventListener('click', () => {
     if (isPaused) {
