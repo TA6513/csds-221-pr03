@@ -32,7 +32,7 @@ let isJumping = false;
 let isDucking = false;
 let jumpSpeed = 10;
 const jumpAcceleration = -11;
-const gravity = 0.7; 
+const gravity = 0.7;
 
 let score = 0;
 const scoreIncrementPerSecond = 10;
@@ -158,14 +158,10 @@ function checkCollision() {
 function updateScore() {
     score += scoreIncrementPerSecond / frameRate;
     document.getElementById('score').innerText = 'HI  ' + getHighScore().toString().padStart(5, 0) + '  ' + Math.floor(score).toString().padStart(5, 0);
+    frameRate *= 1.0001;
 
     if (Math.floor(score) % 100 == 0 && Math.floor(score) != 0) {
         speedupSound.play();
-    }
-
-    if (Math.floor(score) % 250 === 0 && Math.floor(score) != 0) {
-        frameRate *= 1.3;
-        score++;
     }
 }
 
