@@ -27,7 +27,7 @@ canvas {
     top: 10px;
     right: 10px;
     font-size: 18px;
-    color: black; /* Optional: Set color for better visibility */
+    color: black;
 }
 
 #gameOverScreen {
@@ -39,7 +39,7 @@ canvas {
     background-color: rgba(0, 0, 0, 0);
     padding: 20px;
     color: white;
-    display: none; /* Initially hidden */
+    display: none;
 }
 
 @keyframes scrollGround {
@@ -53,13 +53,13 @@ canvas {
 
 #titleImage {
     position: absolute;
-    top: 250px; /* Adjust the top distance to position the title image directly above the canvas */
+    top: 250px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1; /* Ensure the title image appears above other elements */
+    z-index: 1;
 }
 
 #titleImage img {
-    width: 200px; /* Adjust the width of the title image */
-    height: auto; /* Maintain aspect ratio */
+    width: 200px;
+    height: auto;
 }
