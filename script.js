@@ -3,36 +3,43 @@ const ctx = canvas.getContext('2d');
 const defaultFrameRate = 60;
 let frameRate = defaultFrameRate;
 
-const dino = {
-    x: 0,
-    y: canvas.height - 43,
-    width: 40,
-    height: 43,
-    image: new Image(),
-    duckImage: new Image(),
-    deadImage: new Image(),
-    isJumping: false,
-    isDucking: false
-};
+let dinoX = 0;
+let dinoY = canvas.height - 43;
+let dinoWidth = 40;
+let dinoHeight = 43;
+const dinoImage = new Image();
+dinoImage.src = 'assets/dino.png';
+const dinoDuckImage = new Image();
+dinoDuckImage.src = 'assets/dinoducking.png'
+const dinoDeadImage = new Image();
+dinoDeadImage.src = 'assets/dinodead.png'
 
-dino.image.src = 'assets/dino.png';
-dino.duckImage.src = 'assets/dinoducking.png';
-dino.deadImage.src = 'assets/dinodead.png';
-
+let initialObstacleCount = 1;
+let obstacleX = canvas.width;
+let obstacleWidth;
+let obstacleHeight;
 let obstacleSpeed = 5;
-let obstacles = [];
-const cactusImages = [
-    { src: 'assets/cactus.png', width: 23, height: 46 },
-    { src: 'assets/cactus2.png', width: 15, height: 33 }
-];
-let framesSinceLastCactus = 0;
+let obstacles = []; // Array to store obstacles
+const cactusImage1 = new Image();
+cactusImage1.src = 'assets/cactus.png'; // Path to the first type of cactus image
+const cactusImage2 = new Image();
+cactusImage2.src = 'assets/cactus2.png'; // Path to the second type of cactus image
+let framesSinceLastCactus = 0; // Counter to track frames since the last cactus was spawned
 const cactusSpawnInterval = 180;
+
+
+let isJumping = false;
+let isDucking = false;
+let jumpSpeed = 10;
+const jumpAcceleration = -11; // Adjust as needed
+const gravity = 0.7; // Adjust as needed
 
 let score = 0;
 const scoreIncrementPerSecond = 10;
 
 let isGameOver = false;
 let isPaused = false;
+let pausedText = "Paused";
 let gameLoopInterval;
 const pauseButton = document.getElementById('pauseButton');
 const resetButton = document.getElementById('gameOverImage');
@@ -43,29 +50,29 @@ const speedupSound = document.getElementById("speedupSound");
 
 function drawDino() {
     if (isGameOver) {
-        ctx.drawImage(dino.deadImage, dino.x, dino.y, 40, 43);
-    } else if (dino.isDucking) {
-        ctx.drawImage(dino.duckImage, dino.x, dino.y + 17, 55, 26);
+        ctx.drawImage(dinoDeadImage, dinoX, dinoY, 40, 43);
+    } else if (isDucking) {
+        ctx.drawImage(dinoDuckImage, dinoX, dinoY + 17, 55, 26);
     } else {
-        ctx.drawImage(dino.image, dino.x, dino.y, 40, 43);
+        ctx.drawImage(dinoImage, dinoX, dinoY, 40, 43);
     }
 }
 
 function jump() {
-    if (!isGameOver && !dino.isJumping && !dino.isDucking) {
-        dino.isJumping = true;
+    if (!isGameOver && !isJumping && !isDucking) {
+        isJumping = true;
         jumpSound.play();
-        let jumpSpeed = -11; // Initial jump speed
+        let jumpSpeed = jumpAcceleration; // Initial jump speed
         let jumpInterval = setInterval(() => {
             // Update dino position based on jump speed
-            dino.y += jumpSpeed;
-            jumpSpeed += 0.7; // Apply gravity
+            dinoY += jumpSpeed;
+            jumpSpeed += gravity; // Apply gravity
 
             // Check if dino has reached the ground
-            if (dino.y >= canvas.height - dino.height) {
-                dino.y = canvas.height - dino.height; // Ensure dino doesn't go below the ground
+            if (dinoY >= canvas.height - dinoHeight) {
+                dinoY = canvas.height - dinoHeight; // Ensure dino doesn't go below the ground
                 clearInterval(jumpInterval); // Stop the jump interval
-                dino.isJumping = false; // Reset jump flag
+                isJumping = false; // Reset jump flag
             }
         }, 20); // Adjust interval for smoother animation
     }
@@ -77,18 +84,24 @@ function resetObstacle() {
         x: newObstacleX,
         width: 0, // Initialize width and height to be set based on type
         height: 0,
-        type: Math.random() < 0.5 ? 0 : 1 // Randomly choose between type 0 and 1
+        type: Math.random() < 0.5 ? 'type1' : 'type2' // Randomly choose between type1 and type2
     };
 
     // Set width and height based on type
-    newObstacle.width = cactusImages[newObstacle.type].width;
-    newObstacle.height = cactusImages[newObstacle.type].height;
+    if (newObstacle.type === 'type1') {
+        newObstacle.width = 23; // Adjust width for type1
+        newObstacle.height = 46; // Adjust height for type1
+    } else {
+        newObstacle.width = 15; // Adjust width for type2
+        newObstacle.height = 33; // Adjust height for type2
+    }
 
     // Check for collision with existing obstacles
     let overlap = false;
     obstacles.forEach(obstacle => {
         if (newObstacle.x < obstacle.x + obstacle.width &&
-            newObstacle.x + newObstacle.width > obstacle.x) {
+            newObstacle.x + newObstacle.width > obstacle.x &&
+            canvas.height - newObstacle.height < canvas.height - obstacle.height + obstacle.height) {
             overlap = true;
         }
     });
@@ -98,6 +111,7 @@ function resetObstacle() {
         obstacles.push(newObstacle);
     }
 }
+
 
 function moveObstacle() {
     obstacles.forEach(obstacle => {
@@ -110,15 +124,29 @@ function moveObstacle() {
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
-        const cactus = cactusImages[obstacle.type];
-        ctx.drawImage(cactus.image, obstacle.x, canvas.height - cactus.height, cactus.width, cactus.height);
+        // Determine which type of cactus to draw based on obstacle properties
+        let cactusImage;
+        let cactusWidth, cactusHeight;
+        if (obstacle.type === 'type1') {
+            cactusImage = cactusImage1;
+            cactusWidth = 23; // Adjust the width as needed
+            cactusHeight = 46; // Adjust the height as needed
+        } else {
+            cactusImage = cactusImage2;
+            cactusWidth = 15; // Adjust the width as needed
+            cactusHeight = 33; // Adjust the height as needed
+        }
+        // Draw the cactus image at the obstacle's position
+        ctx.drawImage(cactusImage, obstacle.x, canvas.height - cactusHeight, cactusWidth, cactusHeight);
     });
 }
 
+
 function checkCollision() {
-    for (const obstacle of obstacles) {
-        if (dino.x + dino.width > obstacle.x && dino.x < obstacle.x + obstacle.width &&
-            dino.y + dino.height > canvas.height - obstacle.height) {
+    for (const element of obstacles) {
+        const obstacle = element;
+        if (dinoX + dinoWidth > obstacle.x && dinoX < obstacle.x + obstacle.width &&
+            dinoY + dinoHeight > canvas.height - obstacle.height) {
             return true;
         }
     }
@@ -139,15 +167,19 @@ function updateScore() {
     }
 }
 
+// Function to get the high score from local storage
 function getHighScore() {
     const highScore = localStorage.getItem('highScore');
-    return highScore ? parseInt(highScore) : 0;
+    return highScore ? parseInt(highScore) : 0; // Parse the value to an integer, or return 0 if it's not present
 }
 
+
+// Function to save the high score to local storage
 function saveHighScore(score) {
-    localStorage.setItem('highScore', score.toString());
+    localStorage.setItem('highScore', score.toString()); // Convert the score to a string before saving
 }
 
+// Update the high score if the current score surpasses it
 function checkAndUpdateHighScore() {
     const currentScore = Math.floor(score);
     const highScore = getHighScore();
@@ -162,23 +194,25 @@ function gameOver() {
     document.getElementById('gameCanvas').style.animationPlayState = 'paused';
     deathSound.play();
     document.getElementById('gameOverScreen').style.display = 'block';
-    frameRate = defaultFrameRate;
+    frameRate = defaultFrameRate; // Reset frame rate
     checkAndUpdateHighScore();
 }
 
 function resetGame() {
     isGameOver = false;
     score = 0;
-    dino.x = 0;
-    dino.y = canvas.height - 43;
-    obstacles = [];
+    dinoX = 0;
+    dinoY = canvas.height - 43;
+    obstacles = []; // Reset the obstacles array
 
-    frameRate = defaultFrameRate;
+    frameRate = defaultFrameRate; // Reset frame rate to default
 
+    // Clear any existing game loop interval and start a new game loop
     clearTimeout(gameLoopInterval);
     gameLoop();
 
-    for (let i = 0; i < 1; i++) {
+    // Call resetObstacle() multiple times to spawn initial obstacles
+    for (let i = 0; i < initialObstacleCount; i++) {
         resetObstacle();
     }
     document.getElementById('gameOverScreen').style.display = 'none';
@@ -202,11 +236,11 @@ function gameLoop() {
         }
         if (framesSinceLastCactus >= cactusSpawnInterval) {
             resetObstacle();
-            framesSinceLastCactus = 0;
+            framesSinceLastCactus = 0; // Reset the counter
         }
     }
     if (!isPaused) {
-        gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate);
+        gameLoopInterval = setTimeout(gameLoop, 1000 / frameRate); // Request next frame after a delay
     }
 }
 
@@ -219,14 +253,14 @@ document.addEventListener('keydown', (event) => {
         }
     }
 
-    if (event.code === 'ArrowDown' && !dino.isJumping) {
-        dino.isDucking = true;
+    if (event.code === 'ArrowDown' && !isJumping) {
+        isDucking = true;
     }
 });
 
 document.addEventListener('keyup', (event) => {
     if (event.code === 'ArrowDown') {
-        dino.isDucking = false;
+        isDucking = false;
     }
 });
 
